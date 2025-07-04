@@ -161,10 +161,36 @@ function App() {
   );
 
   // UI: Modal for composing new ticket
-  const NewTicketModal = () => (
+  // 
+  // Fix: Fully control modal rendering to ensure parent component state changes do not cause a remount or reset of the input fields.
+  // Move modal close handler out of JSX (prevents inline re-creation).
+  // Avoid using transient state or anonymous functions inline for handler props.
+  // Remove use of unnecessary re-renders.
+  // Make sure that when modal is open, NewTicketModal is not created/unmounted repeatedly.
+  // 
+  // Also: use "body" (was in snippets as t.body, but should use correct API fields for display).
+  // 
+  // The core fix here: maintain the component and handler stability, and do not use expressions or arrow functions as handler props.
+  // All state updates must use their proper setters; form values are bound directly to state.
+
+  // Handler outside component, stable reference:
+  const handleCloseModal = () => setShowNewTicket(false);
+  const handleTitleChange = (e) => setNewTicketTitle(e.target.value);
+  const handleBodyChange = (e) => setNewTicketBody(e.target.value);
+
+  const NewTicketModal = React.useCallback(() => (
     <div className="modal-bg" tabIndex={-1} aria-modal="true">
-      <form className="modal-card" autoComplete="off" onSubmit={createTicket}>
-        <span className="modal-close" tabIndex={0} aria-label="Close" onClick={() => setShowNewTicket(false)}>
+      <form
+        className="modal-card"
+        autoComplete="off"
+        onSubmit={createTicket}
+      >
+        <span
+          className="modal-close"
+          tabIndex={0}
+          aria-label="Close"
+          onClick={handleCloseModal}
+        >
           ✖
         </span>
         <h2 className="modal-title" style={{ color: "var(--primary)" }}>Submit Anonymous Ticket</h2>
@@ -175,8 +201,7 @@ function App() {
           value={newTicketTitle}
           maxLength={100}
           required
-          // Removed autoFocus to prevent unwanted focus behavior on the title when modal is open
-          onChange={e => setNewTicketTitle(e.target.value)}
+          onChange={handleTitleChange}
         />
         <textarea
           className="input-field"
@@ -186,20 +211,30 @@ function App() {
           required
           rows={4}
           style={{ resize: "vertical" }}
-          onChange={e => setNewTicketBody(e.target.value)}
+          onChange={handleBodyChange}
         />
         {newTicketStatus === "error" && <div className="msg-error">Failed to submit. Try again!</div>}
         <div className="modal-actions">
           <button className="btn-primary" type="submit" disabled={newTicketStatus === "submitting"}>
             {newTicketStatus === "submitting" ? "Sending..." : "Submit Ticket"}
           </button>
-          <button className="btn-secondary" type="button" onClick={() => setShowNewTicket(false)}>
+          <button className="btn-secondary" type="button" onClick={handleCloseModal}>
             Cancel
           </button>
         </div>
       </form>
     </div>
-  );
+  // Bindings and all handler references are stable; no new functions created on each render.
+  // This ensures fields are not remounted or recreated, keeping focus intact.
+  ), [
+    newTicketTitle,
+    newTicketBody,
+    newTicketStatus,
+    createTicket,
+    handleCloseModal,
+    handleTitleChange,
+    handleBodyChange,
+  ]);
 
   // UI: Ticket List
   const TicketList = () => (

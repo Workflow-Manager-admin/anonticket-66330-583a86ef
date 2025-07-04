@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Backend API base URL
-const API_BASE = 'http://localhost:8000';
+/**
+ * Backend API base URL
+ * All API calls will use this constant.
+ */
+const API_BASE = 'https://vscode-internal-433-dev.dev01.cloud.kavia.ai:3001';
 
 function App() {
   // Theme state

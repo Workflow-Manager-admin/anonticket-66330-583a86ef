@@ -175,7 +175,7 @@ function App() {
           value={newTicketTitle}
           maxLength={100}
           required
-          autoFocus
+          // Removed autoFocus to prevent unwanted focus behavior on the title when modal is open
           onChange={e => setNewTicketTitle(e.target.value)}
         />
         <textarea

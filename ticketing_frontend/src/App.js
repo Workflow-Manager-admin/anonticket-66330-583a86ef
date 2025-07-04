@@ -95,7 +95,7 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTicketTitle,
-          body: newTicketBody,
+          content: newTicketBody,
         }),
       });
       if (!res.ok) throw new Error("Failed to submit ticket");
